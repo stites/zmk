@@ -10,7 +10,7 @@
 /{
 	chosen {
 		zephyr,display = &epd;
-		zmk,battery = &vbatt;
+		zmk,battery = &fuelgauge;
 	};
 
 	kscan0: kscan {
@@ -42,18 +42,28 @@
 			label = "Blue LED";
 		};
 	};
-
-	vbatt: vbatt {
-		compatible = "zmk,battery-voltage-divider";
-		label = "BATTERY";
-		io-channels = <&adc 0>;
-		output-ohms = <1960000>;
-		full-ohms = <(1960000 + 810000)>;
-	};
-
 };
 
-&spi0 {
+&i2c0 {
+	status = "okay";
+	compatible = "nordic,nrf-twim";
+	sda-pin = <6>;
+	scl-pin = <26>;
+	clock-frequency = <100000>; 
+
+	fuelgauge: bq27xx@55 {
+		compatible = "ti,bq274xx";
+		label = "BATTERY";
+		reg = <0x55>;
+		design-voltage = <3700>; //Battery Design Volatge in mV
+		design-capacity = <180>; //Battery Design Capacity in mAh
+		taper-current = <2>; //Battery Taper current in mAh
+		terminate-voltage = <2750>; //Battery Terminate Voltage in mV
+		int-gpios = <&gpio1 14 GPIO_ACTIVE_LOW>;
+	};
+};
+
+&spi2 {
 	status = "okay";
 	compatible = "nordic,nrf-spim";
 	sck-pin = <27>;
